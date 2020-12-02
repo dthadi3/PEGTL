@@ -248,6 +248,224 @@ jobs:
         - clang-format-11 -i -style=file $(find . -name '[^.]*.[hc]pp')
         - git diff --exit-code
 
+#Added power jobs
+    - compiler: gcc
+      arch: ppc64le
+      addons:
+        apt:
+          sources: [ ubuntu-toolchain-r-test ]
+          packages: [ g++-8 ]
+      env:
+        - CXX=g++-8
+        - LDFLAGS="-lstdc++fs"
+
+    - compiler: gcc
+      arch: ppc64le
+      addons:
+        apt:
+          sources: [ ubuntu-toolchain-r-test ]
+          packages: [ g++-9 ]
+      env:
+        - CXX=g++-9
+
+    - &gcc-10
+      dist: bionic
+      arch: ppc64le
+      compiler: gcc
+      addons:
+        apt:
+          sources: [ ubuntu-toolchain-r-test ]
+          packages: [ g++-10 ]
+      env:
+        - CXX=g++-10
+
+    - <<: *gcc-10
+      arch: ppc64le
+      env:
+        - CXX=g++-10
+        - CXXSTD="-std=c++20"
+      
+    - <<: *gcc-10
+      arch: ppc64le
+      env:
+        - CXX=g++-10
+        - CPPFLAGS="-fno-rtti"
+      
+    - compiler: clang
+      arch: ppc64le
+      addons:
+        apt:
+          sources: [ ubuntu-toolchain-r-test, llvm-toolchain-xenial-5 ]
+          packages: [ clang-5.0, g++-9 ]
+      env:
+        - CXX=clang++-5.0
+
+    - compiler: clang
+      arch: ppc64le
+      addons:
+        apt:
+          sources: [ ubuntu-toolchain-r-test, llvm-toolchain-xenial-6 ]
+          packages: [ clang-6.0, g++-9 ]
+      env:
+        - CXX=clang++-6.0
+
+    - compiler: clang
+      arch: ppc64le
+      addons:
+        apt:
+          sources: [ ubuntu-toolchain-r-test, llvm-toolchain-xenial-7 ]
+          packages: [ clang-7, g++-9 ]
+      env:
+        - CXX=clang++-7
+
+    - compiler: clang
+      arch: ppc64le
+      addons:
+        apt:
+          sources: [ ubuntu-toolchain-r-test, llvm-toolchain-xenial-8 ]
+          packages: [ clang-8, g++-9 ]
+      env:
+        - CXX=clang++-8
+
+    - compiler: clang
+      arch: ppc64le
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main
+              key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+          packages: [ clang-9, g++-9 ]
+      env:
+        - CXX=clang++-9
+
+    - dist: bionic
+      arch: ppc64le
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: deb https://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main
+              key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+          packages: [ clang-10, g++-10 ]
+      env:
+        - CXX=clang++-10
+
+    - &clang-11
+      dist: bionic
+      arch: ppc64le
+      compiler: clang
+      addons:
+        apt:
+          sources: &clang-11-sources
+            - ubuntu-toolchain-r-test
+            - sourceline: deb https://apt.llvm.org/bionic/ llvm-toolchain-bionic-11 main
+              key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+          packages: [ clang-11, g++-10 ]
+      env:
+        - CXX=clang++-11
+
+    - <<: *clang-11
+      arch: ppc64le
+      env:
+        - CXX=clang++-11
+        - CXXSTD="-std=c++20"
+
+    - <<: *clang-11
+      arch: ppc64le
+      env:
+        - CXX=clang++-11
+        - CPPFLAGS="-fms-extensions"
+
+    - <<: *clang-11
+      arch: ppc64le
+      env:
+        - CXX=clang++-11
+        - CPPFLAGS="-fno-rtti"
+
+    - <<: *gcc-10
+      arch: ppc64le
+      env:
+        - CXX=g++-10
+        - CPPFLAGS="-fsanitize=undefined -fuse-ld=gold"
+
+    - <<: *gcc-10
+      arch: ppc64le
+      env:
+        - CXX=g++-10
+        - CPPFLAGS="-fsanitize=address -fuse-ld=gold"
+
+    - <<: *clang-11
+      arch: ppc64le
+      env:
+        - CXX=clang++-11
+        - CPPFLAGS="-fsanitize=undefined"
+
+    - <<: *clang-11
+      arch: ppc64le
+      env:
+        - CXX=clang++-11
+        - CPPFLAGS="-fsanitize=address"
+
+    - dist: bionic
+      arch: ppc64le
+      compiler: clang
+      addons:
+        apt:
+          sources: *clang-11-sources
+          packages: [ clang-11, clang-tidy-11, g++-10 ]
+      env:
+        - CXX=clang++-11
+        - CLANG_TIDY=clang-tidy-11
+      script:
+        - make -kj3 clang-tidy
+
+    - dist: bionic
+      arch: ppc64le
+      compiler: clang
+      addons:
+        apt:
+          sources: *clang-11-sources
+          packages: [ clang-tools-11, g++-10 ]
+      script:
+        - scan-build-11 --use-c++=clang++-11 --status-bugs make -kj3
+
+    - dist: bionic
+      arch: ppc64le
+      compiler: gcc
+      addons:
+        apt:
+          sources: [ ubuntu-toolchain-r-test ]
+          packages: [ g++-10, valgrind ]
+      env:
+        - CXX=g++-10
+        - SPECIAL=valgrind
+      script:
+        - make -kj3 valgrind
+
+    - <<: *gcc-10
+      arch: ppc64le
+      env:
+        - CXX=g++-10
+        - CXXFLAGS="-O0 --coverage"
+      before_script:
+        - pip install --user cpp-coveralls
+      script:
+        - make -kj3 check
+        - coveralls --gcov gcov-10 --gcov-options '\-lp' --exclude src
+
+    - dist: bionic
+      arch: ppc64le
+      compiler: clang
+      addons:
+        apt:
+          sources: *clang-11-sources
+          packages: [ clang-format-11, g++-10 ]
+      script:
+        - clang-format-11 -i -style=file $(find . -name '[^.]*.[hc]pp')
+        - git diff --exit-code
+
 script:
   - $CXX --version
   - make -j3 build/src/test/pegtl/tester
